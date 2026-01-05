@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYBER-STRIKE: FIXED EDITION</title>
+    <title>CYBER-STRIKE: BUG-FREE EDITION</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -23,7 +23,7 @@
             color: var(--neon-green);
             font-family: 'Share Tech Mono', monospace;
             display: flex; align-items: center; justify-content: center;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
         #matrix-bg { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
@@ -33,7 +33,7 @@
             border: 2px solid var(--neon-green);
             padding: 15px;
             box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
-            width: 95%; max-width: 600px;
+            width: 95%; max-width: 500px;
             backdrop-filter: blur(10px);
             z-index: 10;
         }
@@ -63,35 +63,28 @@
         #board { display: grid; gap: 2px; margin: 0 auto; }
 
         .cell {
-            width: clamp(30px, 9vw, 40px);
-            height: clamp(30px, 9vw, 40px);
+            width: clamp(28px, 8vw, 38px);
+            height: clamp(28px, 8vw, 38px);
             background: rgba(0, 255, 0, 0.05);
             border: 1px solid rgba(57, 255, 20, 0.2);
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-weight: bold; font-size: 16px;
-            user-select: none; transition: 0.1s;
+            user-select: none;
         }
 
-        .cell:hover:not(.revealed) { background: var(--neon-green); color: var(--dark); }
-        .cell.revealed { background: rgba(255, 255, 255, 0.05); border-color: transparent; color: #fff; }
+        .cell.revealed { background: rgba(255, 255, 255, 0.08); border-color: transparent; color: #fff; }
         .cell.mine { background: var(--neon-red); color: white; }
-        .cell.flagged { color: var(--neon-red); }
+        .cell.flagged { color: var(--neon-red); font-size: 12px; }
 
-        .controls { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px;
-        }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
         select, button {
             background: transparent; color: var(--neon-green);
-            border: 1px solid var(--neon-green); padding: 12px;
+            border: 1px solid var(--neon-green); padding: 10px;
             font-family: 'Share Tech Mono'; cursor: pointer;
-            text-transform: uppercase; font-size: 12px;
+            text-transform: uppercase; font-size: 11px;
         }
 
-        button:active { transform: scale(0.95); }
-        #btn-mode { color: var(--neon-blue); border-color: var(--neon-blue); }
         #btn-mode.active-flag { background: var(--neon-red); color: white; border-color: var(--neon-red); }
 
         #audio-init {
@@ -102,19 +95,13 @@
 
         .n1 { color: var(--neon-blue); } .n2 { color: var(--neon-green); } 
         .n3 { color: var(--neon-red); } .n4 { color: #fcee0a; }
-
-        @media (max-width: 480px) {
-            .header-panel { grid-template-columns: 1fr 1fr; }
-            .stat-box:last-child { grid-column: span 2; }
-            .controls { grid-template-columns: 1fr; }
-        }
     </style>
 </head>
 <body>
 
     <div id="audio-init">
         <h1 style="font-family: 'Orbitron'; color: var(--neon-green);">CYBER-STRIKE</h1>
-        <button onclick="startSystem()">[ ENTRAR AL SISTEMA ]</button>
+        <button onclick="startSystem()">[ VINCULAR NEURONALMENTE ]</button>
     </div>
 
     <canvas id="matrix-bg"></canvas>
@@ -123,7 +110,7 @@
         <div class="header-panel">
             <div class="stat-box"><span class="stat-label">Cores</span><span id="mine-count" class="stat-value">000</span></div>
             <div class="stat-box"><span class="stat-label">Score</span><span id="score-display" class="stat-value">0000</span></div>
-            <div class="stat-box"><span class="stat-label">Status</span><span id="status-text" class="stat-value">ONLINE</span></div>
+            <div class="stat-box"><span class="stat-label">System</span><span id="status-text" class="stat-value">OK</span></div>
         </div>
 
         <div id="board-container">
@@ -136,9 +123,9 @@
                 <option value="medium">PHREAKER (16x16)</option>
                 <option value="hard">ARCHITECT (30x16)</option>
             </select>
-            <button onclick="initGame()">REBOOT</button>
+            <button onclick="initGame()">HARD RESET</button>
             <button id="btn-mode" onclick="toggleTouchMode()">MODO: EXCAVAR</button>
-            <button onclick="alert('Récords online próximamente...')">LEADERBOARD</button>
+            <button onclick="alert('Acceso denegado: Servidor Offline')">LEADERBOARD</button>
         </div>
     </div>
 
@@ -166,9 +153,9 @@
             ctx.fillStyle = 'rgba(2,2,5,0.1)'; ctx.fillRect(0,0,w,h);
             ctx.fillStyle = '#0F0'; ctx.font = '15px monospace';
             drops.forEach((y, i) => {
-                const txt = String.fromCharCode(Math.random()*128);
+                const txt = String.fromCharCode(Math.floor(Math.random() * 94) + 33);
                 ctx.fillText(txt, i*20, y*20);
-                if(y*20 > h && Math.random() > 0.98) drops[i] = 0;
+                if(y*20 > h && Math.random() > 0.975) drops[i] = 0;
                 drops[i]++;
             });
         }
@@ -201,7 +188,7 @@
             board.style.width = config.c > 15 ? 'max-content' : '100%';
             
             grid = []; active = true; score = 0; flags = 0; maxMines = config.m;
-            document.getElementById('status-text').textContent = "ONLINE";
+            document.getElementById('status-text').textContent = "OK";
             updateUI();
 
             for(let r=0; r<config.r; r++) {
@@ -238,31 +225,46 @@
             if(touchMode === 'flag') flag(r, c); else reveal(r, c);
         }
 
+        // --- ALGORITMO DE INUNDACIÓN SEGURO (SIN BUGS) ---
         function reveal(r, c) {
-            if(!grid[r] || !grid[r][c] || grid[r][c].rev || grid[r][c].flg) return;
-            const cell = grid[r][c];
-            cell.rev = true;
-            const el = document.getElementById(`cell-${r}-${c}`);
-            el.classList.add('revealed');
+            if (grid[r][c].rev || grid[r][c].flg) return;
+            
+            let stack = [[r, c]];
+            while(stack.length > 0) {
+                let [currR, currC] = stack.pop();
+                let cell = grid[currR][currC];
+                if(cell.rev || cell.flg) continue;
 
-            if(cell.mine) {
-                playSfx(100, 'sawtooth', 0.5, 0.2);
-                gameOver(false);
-            } else {
-                playSfx(500 + (cell.n * 50), 'sine', 0.05, 0.05);
-                score += 10; updateUI();
+                cell.rev = true;
+                const el = document.getElementById(`cell-${currR}-${currC}`);
+                el.classList.add('revealed');
+
+                if(cell.mine) {
+                    playSfx(100, 'sawtooth', 0.5, 0.2);
+                    gameOver();
+                    return;
+                }
+
+                score += 10;
                 if(cell.n > 0) {
                     el.textContent = cell.n;
                     el.classList.add('n' + cell.n);
                 } else {
+                    // Si es cero, agregamos vecinos a la pila para revisar
                     for(let i=-1; i<=1; i++) {
                         for(let j=-1; j<=1; j++) {
-                            if(i !== 0 || j !== 0) reveal(r+i, c+j);
+                            let nr = currR + i;
+                            let nc = currC + j;
+                            if(grid[nr] && grid[nr][nc] && !grid[nr][nc].rev) {
+                                stack.push([nr, nc]);
+                            }
                         }
                     }
                 }
-                checkWin();
             }
+            playSfx(600, 'sine', 0.05, 0.03);
+            updateUI();
+            checkWin();
         }
 
         function flag(r, c) {
@@ -282,9 +284,9 @@
             document.getElementById('score-display').textContent = score.toString().padStart(4,'0');
         }
 
-        function gameOver(win) {
+        function gameOver() {
             active = false;
-            document.getElementById('status-text').textContent = win ? "CLEAN" : "ERROR";
+            document.getElementById('status-text').textContent = "CRASH";
             grid.flat().forEach(c => {
                 if(c.mine) {
                     const el = document.getElementById(`cell-${c.r}-${c.c}`);
@@ -296,7 +298,11 @@
         function checkWin() {
             const config = MODES[document.getElementById('mode-select').value];
             const revCount = grid.flat().filter(c => c.rev).length;
-            if(revCount === (config.r * config.c) - config.m) gameOver(true);
+            if(revCount === (config.r * config.c) - config.m) {
+                active = false;
+                document.getElementById('status-text').textContent = "WIN";
+                playSfx(800, 'sine', 0.3, 0.1);
+            }
         }
     </script>
 </body>
