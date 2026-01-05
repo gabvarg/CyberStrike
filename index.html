@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYBER-STRIKE: ULTIMATE EDITION</title>
+    <title>CYBER-STRIKE: FIXED EDITION</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
 
@@ -11,11 +11,10 @@
             --neon-green: #39ff14;
             --neon-red: #ff003c;
             --neon-blue: #00f3ff;
-            --neon-yellow: #fcee0a;
             --dark: #020205;
         }
 
-        * { box-sizing: border-box; touch-action: manipulation; }
+        * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 
         body, html {
             margin: 0; padding: 0;
@@ -24,6 +23,7 @@
             color: var(--neon-green);
             font-family: 'Share Tech Mono', monospace;
             display: flex; align-items: center; justify-content: center;
+            overflow-x: hidden;
         }
 
         #matrix-bg { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
@@ -33,7 +33,7 @@
             border: 2px solid var(--neon-green);
             padding: 15px;
             box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
-            width: 95%; max-width: 900px;
+            width: 95%; max-width: 600px;
             backdrop-filter: blur(10px);
             z-index: 10;
         }
@@ -60,24 +60,22 @@
             display: flex; justify-content: center;
         }
 
-        #board { display: grid; gap: 2px; }
+        #board { display: grid; gap: 2px; margin: 0 auto; }
 
         .cell {
-            width: clamp(25px, 8vw, 35px);
-            height: clamp(25px, 8vw, 35px);
+            width: clamp(30px, 9vw, 40px);
+            height: clamp(30px, 9vw, 40px);
             background: rgba(0, 255, 0, 0.05);
             border: 1px solid rgba(57, 255, 20, 0.2);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-weight: bold; font-size: clamp(12px, 4vw, 18px);
-            user-select: none;
+            cursor: pointer; font-weight: bold; font-size: 16px;
+            user-select: none; transition: 0.1s;
         }
 
         .cell:hover:not(.revealed) { background: var(--neon-green); color: var(--dark); }
-        .cell.revealed { background: rgba(255, 255, 255, 0.05); border-color: transparent; cursor: default; }
-        .cell.mine { background: var(--neon-red); color: white; animation: pulse 0.5s infinite; }
+        .cell.revealed { background: rgba(255, 255, 255, 0.05); border-color: transparent; color: #fff; }
+        .cell.mine { background: var(--neon-red); color: white; }
         .cell.flagged { color: var(--neon-red); }
-
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
         .controls { 
             display: grid; 
@@ -87,26 +85,25 @@
 
         select, button {
             background: transparent; color: var(--neon-green);
-            border: 1px solid var(--neon-green); padding: 10px;
+            border: 1px solid var(--neon-green); padding: 12px;
             font-family: 'Share Tech Mono'; cursor: pointer;
             text-transform: uppercase; font-size: 12px;
         }
 
-        button:hover { background: var(--neon-green); color: var(--dark); }
-        #btn-mode { border-color: var(--neon-blue); color: var(--neon-blue); }
+        button:active { transform: scale(0.95); }
+        #btn-mode { color: var(--neon-blue); border-color: var(--neon-blue); }
         #btn-mode.active-flag { background: var(--neon-red); color: white; border-color: var(--neon-red); }
 
         #audio-init {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--dark); z-index: 100;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; padding: 20px;
         }
 
         .n1 { color: var(--neon-blue); } .n2 { color: var(--neon-green); } 
-        .n3 { color: var(--neon-red); } .n4 { color: var(--neon-yellow); }
+        .n3 { color: var(--neon-red); } .n4 { color: #fcee0a; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
             .header-panel { grid-template-columns: 1fr 1fr; }
             .stat-box:last-child { grid-column: span 2; }
             .controls { grid-template-columns: 1fr; }
@@ -116,9 +113,8 @@
 <body>
 
     <div id="audio-init">
-        <h1 style="font-family: 'Orbitron'; color: var(--neon-green); letter-spacing: 5px;">CYBER-STRIKE</h1>
-        <p style="color: var(--neon-blue);">REQUISICIÓN DE ACCESO A RED</p>
-        <button onclick="startSystem()" style="font-size: 18px; padding: 15px 30px;">[ INICIALIZAR ENLACE ]</button>
+        <h1 style="font-family: 'Orbitron'; color: var(--neon-green);">CYBER-STRIKE</h1>
+        <button onclick="startSystem()">[ ENTRAR AL SISTEMA ]</button>
     </div>
 
     <canvas id="matrix-bg"></canvas>
@@ -126,8 +122,8 @@
     <div class="main-interface" id="ui-main" style="display:none;">
         <div class="header-panel">
             <div class="stat-box"><span class="stat-label">Cores</span><span id="mine-count" class="stat-value">000</span></div>
-            <div class="stat-box"><span class="stat-label">Score</span><span id="score-display" class="stat-value" style="color:var(--neon-blue)">0000</span></div>
-            <div class="stat-box"><span class="stat-label">Status</span><span id="status-text" class="stat-value">OK</span></div>
+            <div class="stat-box"><span class="stat-label">Score</span><span id="score-display" class="stat-value">0000</span></div>
+            <div class="stat-box"><span class="stat-label">Status</span><span id="status-text" class="stat-value">ONLINE</span></div>
         </div>
 
         <div id="board-container">
@@ -147,7 +143,6 @@
     </div>
 
     <script>
-        // --- AUDIO ---
         let audioCtx;
         function initAudio() { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function playSfx(f, t, d, v) {
@@ -160,7 +155,6 @@
             o.start(); o.stop(audioCtx.currentTime + d);
         }
 
-        // --- MATRIX ---
         const canvas = document.getElementById('matrix-bg');
         const ctx = canvas.getContext('2d');
         let w, h, drops;
@@ -181,7 +175,6 @@
         window.addEventListener('resize', resize); resize();
         setInterval(drawMatrix, 50);
 
-        // --- GAME ---
         const MODES = { easy: {r:10, c:10, m:10}, medium: {r:16, c:16, m:40}, hard: {r:16, c:30, m:99} };
         let grid = [], active = false, score = 0, flags = 0, maxMines = 0, touchMode = 'dig';
 
@@ -208,8 +201,7 @@
             board.style.width = config.c > 15 ? 'max-content' : '100%';
             
             grid = []; active = true; score = 0; flags = 0; maxMines = config.m;
-            document.getElementById('status-text').textContent = "OK";
-            document.getElementById('status-text').style.color = "var(--neon-green)";
+            document.getElementById('status-text').textContent = "ONLINE";
             updateUI();
 
             for(let r=0; r<config.r; r++) {
@@ -230,43 +222,53 @@
                 if(!grid[rr][rc].mine) { grid[rr][rc].mine = true; m++; }
             }
 
-            grid.forEach((row, r) => row.forEach((cell, c) => {
-                if(!cell.mine) {
+            for(let r=0; r<config.r; r++) {
+                for(let c=0; c<config.c; c++) {
+                    if(grid[r][c].mine) continue;
                     let n = 0;
                     for(let i=-1; i<=1; i++) for(let j=-1; j<=1; j++)
                         if(grid[r+i] && grid[r+i][c+j] && grid[r+i][c+j].mine) n++;
-                    cell.n = n;
+                    grid[r][c].n = n;
                 }
-            }));
+            }
         }
 
         function handleInput(r, c) {
+            if(!active) return;
             if(touchMode === 'flag') flag(r, c); else reveal(r, c);
         }
 
         function reveal(r, c) {
-            if(!active || grid[r][c].rev || grid[r][c].flg) return;
-            const cell = grid[r][c]; cell.rev = true;
+            if(!grid[r] || !grid[r][c] || grid[r][c].rev || grid[r][c].flg) return;
+            const cell = grid[r][c];
+            cell.rev = true;
             const el = document.getElementById(`cell-${r}-${c}`);
             el.classList.add('revealed');
 
             if(cell.mine) {
-                playSfx(80, 'sawtooth', 0.8, 0.2);
+                playSfx(100, 'sawtooth', 0.5, 0.2);
                 gameOver(false);
             } else {
-                playSfx(400 + (cell.n * 50), 'sine', 0.1, 0.05);
+                playSfx(500 + (cell.n * 50), 'sine', 0.05, 0.05);
                 score += 10; updateUI();
-                if(cell.n > 0) { el.textContent = cell.n; el.classList.add('n'+cell.n); }
-                else { for(let i=-1; i<=1; i++) for(let j=-1; j<=1; j++) if(grid[r+i] && grid[r+i][c+j]) reveal(r+i, c+j); }
+                if(cell.n > 0) {
+                    el.textContent = cell.n;
+                    el.classList.add('n' + cell.n);
+                } else {
+                    for(let i=-1; i<=1; i++) {
+                        for(let j=-1; j<=1; j++) {
+                            if(i !== 0 || j !== 0) reveal(r+i, c+j);
+                        }
+                    }
+                }
                 checkWin();
             }
         }
 
         function flag(r, c) {
-            if(!active || grid[r][c].rev) return;
             const cell = grid[r][c];
+            if(cell.rev) return;
             if(!cell.flg && flags >= maxMines) return;
-            
             cell.flg = !cell.flg;
             flags += cell.flg ? 1 : -1;
             playSfx(200, 'square', 0.05, 0.05);
@@ -282,17 +284,19 @@
 
         function gameOver(win) {
             active = false;
-            document.getElementById('status-text').textContent = win ? "CLEAN" : "CRASH";
-            document.getElementById('status-text').style.color = win ? "var(--neon-blue)" : "var(--neon-red)";
-            grid.flat().forEach(c => { if(c.mine) {
-                const el = document.getElementById(`cell-${c.r}-${c.c}`);
-                el.classList.add('mine'); el.textContent = '☢';
-            }});
+            document.getElementById('status-text').textContent = win ? "CLEAN" : "ERROR";
+            grid.flat().forEach(c => {
+                if(c.mine) {
+                    const el = document.getElementById(`cell-${c.r}-${c.c}`);
+                    el.classList.add('mine'); el.textContent = '☢';
+                }
+            });
         }
 
         function checkWin() {
             const config = MODES[document.getElementById('mode-select').value];
-            if(grid.flat().filter(c => c.rev).length === (config.r*config.c)-config.m) gameOver(true);
+            const revCount = grid.flat().filter(c => c.rev).length;
+            if(revCount === (config.r * config.c) - config.m) gameOver(true);
         }
     </script>
 </body>
