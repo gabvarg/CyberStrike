@@ -1,309 +1,326 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYBER-STRIKE: BUG-FREE EDITION</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberDash - Mini Juego</title>
+  <style>
+    :root {
+      --bg: #090b12;
+      --panel: #121725;
+      --accent: #00e5ff;
+      --danger: #ff4d6d;
+      --text: #f5f7ff;
+      --muted: #9ca3af;
+      --good: #22c55e;
+    }
 
-        :root {
-            --neon-green: #39ff14;
-            --neon-red: #ff003c;
-            --neon-blue: #00f3ff;
-            --dark: #020205;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+    }
 
-        * { box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #16203a 0%, var(--bg) 45%);
+      color: var(--text);
+      padding: 16px;
+    }
 
-        body, html {
-            margin: 0; padding: 0;
-            width: 100%; min-height: 100vh;
-            background: var(--dark);
-            color: var(--neon-green);
-            font-family: 'Share Tech Mono', monospace;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
+    .wrapper {
+      width: min(92vw, 760px);
+      display: grid;
+      gap: 12px;
+    }
 
-        #matrix-bg { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.15; }
+    .hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border: 1px solid #27314b;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #111827, #0b1020);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+    }
 
-        .main-interface {
-            background: rgba(5, 10, 5, 0.95);
-            border: 2px solid var(--neon-green);
-            padding: 15px;
-            box-shadow: 0 0 30px rgba(57, 255, 20, 0.2);
-            width: 95%; max-width: 500px;
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
+    .hud strong {
+      color: var(--accent);
+    }
 
-        .header-panel {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px; margin-bottom: 15px;
-            border-bottom: 1px solid var(--neon-green);
-            padding-bottom: 10px;
-        }
+    .help {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
 
-        .stat-box { text-align: center; border: 1px solid rgba(57, 255, 20, 0.2); padding: 5px; }
-        .stat-label { font-size: 9px; color: var(--neon-blue); text-transform: uppercase; display: block; }
-        .stat-value { font-size: 16px; font-family: 'Orbitron'; color: #fff; }
+    canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: 1px solid #263146;
+      background: linear-gradient(180deg, #0f172a, #020617);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+    }
 
-        #board-container {
-            width: 100%;
-            overflow: auto;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
-            border: 1px solid var(--neon-green);
-            margin-bottom: 15px;
-            display: flex; justify-content: center;
-        }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      background: rgba(2, 6, 23, 0.7);
+      backdrop-filter: blur(2px);
+      transition: opacity 0.2s ease;
+    }
 
-        #board { display: grid; gap: 2px; margin: 0 auto; }
+    .panel {
+      width: min(90vw, 400px);
+      background: var(--panel);
+      border: 1px solid #25324a;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
 
-        .cell {
-            width: clamp(28px, 8vw, 38px);
-            height: clamp(28px, 8vw, 38px);
-            background: rgba(0, 255, 0, 0.05);
-            border: 1px solid rgba(57, 255, 20, 0.2);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; font-weight: bold; font-size: 16px;
-            user-select: none;
-        }
+    .panel h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
 
-        .cell.revealed { background: rgba(255, 255, 255, 0.08); border-color: transparent; color: #fff; }
-        .cell.mine { background: var(--neon-red); color: white; }
-        .cell.flagged { color: var(--neon-red); font-size: 12px; }
+    .panel p {
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
 
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button {
+      background: var(--accent);
+      color: #001018;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
 
-        select, button {
-            background: transparent; color: var(--neon-green);
-            border: 1px solid var(--neon-green); padding: 10px;
-            font-family: 'Share Tech Mono'; cursor: pointer;
-            text-transform: uppercase; font-size: 11px;
-        }
+    button:hover {
+      transform: translateY(-1px);
+    }
 
-        #btn-mode.active-flag { background: var(--neon-red); color: white; border-color: var(--neon-red); }
-
-        #audio-init {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark); z-index: 100;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-
-        .n1 { color: var(--neon-blue); } .n2 { color: var(--neon-green); } 
-        .n3 { color: var(--neon-red); } .n4 { color: #fcee0a; }
-    </style>
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
-
-    <div id="audio-init">
-        <h1 style="font-family: 'Orbitron'; color: var(--neon-green);">CYBER-STRIKE</h1>
-        <button onclick="startSystem()">[ VINCULAR NEURONALMENTE ]</button>
+  <div class="wrapper">
+    <div class="hud">
+      <div>Puntaje: <strong id="score">0</strong></div>
+      <div>Mejor: <strong id="best">0</strong></div>
+      <div class="help">Mover: ← → o A D | Reiniciar: R</div>
     </div>
+    <canvas id="game" width="760" height="420" aria-label="Juego CyberDash"></canvas>
+  </div>
 
-    <canvas id="matrix-bg"></canvas>
-
-    <div class="main-interface" id="ui-main" style="display:none;">
-        <div class="header-panel">
-            <div class="stat-box"><span class="stat-label">Cores</span><span id="mine-count" class="stat-value">000</span></div>
-            <div class="stat-box"><span class="stat-label">Score</span><span id="score-display" class="stat-value">0000</span></div>
-            <div class="stat-box"><span class="stat-label">System</span><span id="status-text" class="stat-value">OK</span></div>
-        </div>
-
-        <div id="board-container">
-            <div id="board"></div>
-        </div>
-
-        <div class="controls">
-            <select id="mode-select" onchange="initGame()">
-                <option value="easy">SCRIPTER (10x10)</option>
-                <option value="medium">PHREAKER (16x16)</option>
-                <option value="hard">ARCHITECT (30x16)</option>
-            </select>
-            <button onclick="initGame()">HARD RESET</button>
-            <button id="btn-mode" onclick="toggleTouchMode()">MODO: EXCAVAR</button>
-            <button onclick="alert('Acceso denegado: Servidor Offline')">LEADERBOARD</button>
-        </div>
+  <div id="overlay" class="overlay">
+    <div class="panel">
+      <h1>CyberDash</h1>
+      <p>Evita los drones rojos y sobrevive lo máximo posible.</p>
+      <button id="startBtn">Jugar</button>
     </div>
+  </div>
 
-    <script>
-        let audioCtx;
-        function initAudio() { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        function playSfx(f, t, d, v) {
-            if(!audioCtx) return;
-            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-            o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-            g.gain.setValueAtTime(v, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-            o.connect(g); g.connect(audioCtx.destination);
-            o.start(); o.stop(audioCtx.currentTime + d);
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const bestEl = document.getElementById('best');
+    const overlay = document.getElementById('overlay');
+    const startBtn = document.getElementById('startBtn');
+
+    const state = {
+      running: false,
+      score: 0,
+      best: Number(localStorage.getItem('cyberdash_best') || 0),
+      speed: 2.3,
+      spawnRate: 950,
+      lastSpawn: 0,
+      stars: [],
+      keys: new Set()
+    };
+
+    const player = {
+      x: canvas.width / 2 - 17,
+      y: canvas.height - 58,
+      w: 34,
+      h: 34,
+      speed: 5.8
+    };
+
+    let enemies = [];
+    let lastTime = 0;
+
+    function resetGame() {
+      state.score = 0;
+      state.speed = 2.3;
+      state.spawnRate = 950;
+      state.lastSpawn = 0;
+      player.x = canvas.width / 2 - player.w / 2;
+      enemies = [];
+      state.stars = Array.from({ length: 60 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        s: Math.random() * 1.8 + 0.2,
+        v: Math.random() * 0.6 + 0.2
+      }));
+      scoreEl.textContent = '0';
+      bestEl.textContent = String(state.best);
+    }
+
+    function spawnEnemy() {
+      const size = 20 + Math.random() * 22;
+      enemies.push({
+        x: Math.random() * (canvas.width - size),
+        y: -size,
+        w: size,
+        h: size,
+        speed: state.speed + Math.random() * 1.5
+      });
+    }
+
+    function drawRoundedRect(x, y, w, h, r, fill) {
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function collide(a, b) {
+      return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+      );
+    }
+
+    function update(delta, timestamp) {
+      if (state.keys.has('ArrowLeft') || state.keys.has('a')) {
+        player.x -= player.speed;
+      }
+      if (state.keys.has('ArrowRight') || state.keys.has('d')) {
+        player.x += player.speed;
+      }
+      player.x = Math.max(0, Math.min(canvas.width - player.w, player.x));
+
+      state.stars.forEach((star) => {
+        star.y += star.v * (1 + state.speed / 5);
+        if (star.y > canvas.height) {
+          star.y = -2;
+          star.x = Math.random() * canvas.width;
         }
+      });
 
-        const canvas = document.getElementById('matrix-bg');
-        const ctx = canvas.getContext('2d');
-        let w, h, drops;
-        function resize() {
-            w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight;
-            drops = Array(Math.floor(w/20)).fill(1);
-        }
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(2,2,5,0.1)'; ctx.fillRect(0,0,w,h);
-            ctx.fillStyle = '#0F0'; ctx.font = '15px monospace';
-            drops.forEach((y, i) => {
-                const txt = String.fromCharCode(Math.floor(Math.random() * 94) + 33);
-                ctx.fillText(txt, i*20, y*20);
-                if(y*20 > h && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
-        window.addEventListener('resize', resize); resize();
-        setInterval(drawMatrix, 50);
+      if (timestamp - state.lastSpawn > state.spawnRate) {
+        state.lastSpawn = timestamp;
+        spawnEnemy();
+      }
 
-        const MODES = { easy: {r:10, c:10, m:10}, medium: {r:16, c:16, m:40}, hard: {r:16, c:30, m:99} };
-        let grid = [], active = false, score = 0, flags = 0, maxMines = 0, touchMode = 'dig';
+      enemies.forEach((enemy) => {
+        enemy.y += enemy.speed * delta;
+      });
 
-        function startSystem() {
-            initAudio();
-            document.getElementById('audio-init').style.display = 'none';
-            document.getElementById('ui-main').style.display = 'block';
-            initGame();
-        }
+      enemies = enemies.filter((enemy) => enemy.y < canvas.height + enemy.h);
 
-        function toggleTouchMode() {
-            touchMode = (touchMode === 'dig') ? 'flag' : 'dig';
-            const btn = document.getElementById('btn-mode');
-            btn.textContent = touchMode === 'dig' ? 'MODO: EXCAVAR' : 'MODO: BANDERA';
-            btn.className = touchMode === 'flag' ? 'active-flag' : '';
-            playSfx(300, 'square', 0.1, 0.05);
-        }
+      if (enemies.some((enemy) => collide(player, enemy))) {
+        gameOver();
+        return;
+      }
 
-        function initGame() {
-            const config = MODES[document.getElementById('mode-select').value];
-            const board = document.getElementById('board');
-            board.innerHTML = '';
-            board.style.gridTemplateColumns = `repeat(${config.c}, 1fr)`;
-            board.style.width = config.c > 15 ? 'max-content' : '100%';
-            
-            grid = []; active = true; score = 0; flags = 0; maxMines = config.m;
-            document.getElementById('status-text').textContent = "OK";
-            updateUI();
+      state.score += delta * 8;
+      state.speed += delta * 0.02;
+      state.spawnRate = Math.max(360, state.spawnRate - delta * 0.35);
+      scoreEl.textContent = String(Math.floor(state.score));
+    }
 
-            for(let r=0; r<config.r; r++) {
-                grid[r] = [];
-                for(let c=0; c<config.c; c++) {
-                    grid[r][c] = {r, c, mine:false, rev:false, flg:false, n:0};
-                    const el = document.createElement('div');
-                    el.className = 'cell'; el.id = `cell-${r}-${c}`;
-                    el.addEventListener('click', () => handleInput(r, c));
-                    el.addEventListener('contextmenu', (e) => { e.preventDefault(); flag(r, c); });
-                    board.appendChild(el);
-                }
-            }
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            let m = 0;
-            while(m < config.m) {
-                let rr = Math.floor(Math.random()*config.r), rc = Math.floor(Math.random()*config.c);
-                if(!grid[rr][rc].mine) { grid[rr][rc].mine = true; m++; }
-            }
+      state.stars.forEach((star) => {
+        ctx.fillStyle = '#9fb8ff';
+        ctx.globalAlpha = 0.35;
+        ctx.fillRect(star.x, star.y, star.s, star.s);
+      });
+      ctx.globalAlpha = 1;
 
-            for(let r=0; r<config.r; r++) {
-                for(let c=0; c<config.c; c++) {
-                    if(grid[r][c].mine) continue;
-                    let n = 0;
-                    for(let i=-1; i<=1; i++) for(let j=-1; j<=1; j++)
-                        if(grid[r+i] && grid[r+i][c+j] && grid[r+i][c+j].mine) n++;
-                    grid[r][c].n = n;
-                }
-            }
-        }
+      drawRoundedRect(player.x, player.y, player.w, player.h, 8, '#00e5ff');
+      ctx.fillStyle = '#001c28';
+      ctx.fillRect(player.x + 8, player.y + 8, 18, 18);
 
-        function handleInput(r, c) {
-            if(!active) return;
-            if(touchMode === 'flag') flag(r, c); else reveal(r, c);
-        }
+      enemies.forEach((enemy) => {
+        drawRoundedRect(enemy.x, enemy.y, enemy.w, enemy.h, 6, '#ff4d6d');
+        ctx.fillStyle = '#4a0010';
+        ctx.fillRect(enemy.x + enemy.w * 0.24, enemy.y + enemy.h * 0.24, enemy.w * 0.52, enemy.h * 0.52);
+      });
+    }
 
-        // --- ALGORITMO DE INUNDACIÓN SEGURO (SIN BUGS) ---
-        function reveal(r, c) {
-            if (grid[r][c].rev || grid[r][c].flg) return;
-            
-            let stack = [[r, c]];
-            while(stack.length > 0) {
-                let [currR, currC] = stack.pop();
-                let cell = grid[currR][currC];
-                if(cell.rev || cell.flg) continue;
+    function loop(timestamp = 0) {
+      if (!state.running) return;
+      const delta = Math.min((timestamp - lastTime) / 16.67, 2.5);
+      lastTime = timestamp;
 
-                cell.rev = true;
-                const el = document.getElementById(`cell-${currR}-${currC}`);
-                el.classList.add('revealed');
+      update(delta, timestamp);
+      draw();
+      requestAnimationFrame(loop);
+    }
 
-                if(cell.mine) {
-                    playSfx(100, 'sawtooth', 0.5, 0.2);
-                    gameOver();
-                    return;
-                }
+    function startGame() {
+      resetGame();
+      state.running = true;
+      overlay.classList.add('hidden');
+      startBtn.textContent = 'Reintentar';
+      lastTime = performance.now();
+      requestAnimationFrame(loop);
+    }
 
-                score += 10;
-                if(cell.n > 0) {
-                    el.textContent = cell.n;
-                    el.classList.add('n' + cell.n);
-                } else {
-                    // Si es cero, agregamos vecinos a la pila para revisar
-                    for(let i=-1; i<=1; i++) {
-                        for(let j=-1; j<=1; j++) {
-                            let nr = currR + i;
-                            let nc = currC + j;
-                            if(grid[nr] && grid[nr][nc] && !grid[nr][nc].rev) {
-                                stack.push([nr, nc]);
-                            }
-                        }
-                    }
-                }
-            }
-            playSfx(600, 'sine', 0.05, 0.03);
-            updateUI();
-            checkWin();
-        }
+    function gameOver() {
+      state.running = false;
+      state.best = Math.max(state.best, Math.floor(state.score));
+      localStorage.setItem('cyberdash_best', String(state.best));
+      bestEl.textContent = String(state.best);
+      overlay.classList.remove('hidden');
+    }
 
-        function flag(r, c) {
-            const cell = grid[r][c];
-            if(cell.rev) return;
-            if(!cell.flg && flags >= maxMines) return;
-            cell.flg = !cell.flg;
-            flags += cell.flg ? 1 : -1;
-            playSfx(200, 'square', 0.05, 0.05);
-            document.getElementById(`cell-${r}-${c}`).textContent = cell.flg ? '⚠' : '';
-            document.getElementById(`cell-${r}-${c}`).classList.toggle('flagged');
-            updateUI();
-        }
+    document.addEventListener('keydown', (event) => {
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      state.keys.add(key);
 
-        function updateUI() {
-            document.getElementById('mine-count').textContent = (maxMines - flags).toString().padStart(3,'0');
-            document.getElementById('score-display').textContent = score.toString().padStart(4,'0');
-        }
+      if (key.toLowerCase() === 'r' && !state.running) {
+        startGame();
+      }
+    });
 
-        function gameOver() {
-            active = false;
-            document.getElementById('status-text').textContent = "CRASH";
-            grid.flat().forEach(c => {
-                if(c.mine) {
-                    const el = document.getElementById(`cell-${c.r}-${c.c}`);
-                    el.classList.add('mine'); el.textContent = '☢';
-                }
-            });
-        }
+    document.addEventListener('keyup', (event) => {
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      state.keys.delete(key);
+    });
 
-        function checkWin() {
-            const config = MODES[document.getElementById('mode-select').value];
-            const revCount = grid.flat().filter(c => c.rev).length;
-            if(revCount === (config.r * config.c) - config.m) {
-                active = false;
-                document.getElementById('status-text').textContent = "WIN";
-                playSfx(800, 'sine', 0.3, 0.1);
-            }
-        }
-    </script>
+    startBtn.addEventListener('click', startGame);
+    resetGame();
+    draw();
+  </script>
 </body>
 </html>
